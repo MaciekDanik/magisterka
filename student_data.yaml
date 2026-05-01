@@ -1,0 +1,7 @@
+train: 
+  - datasets/manual/train/images
+  - datasets/pseudo/images      # AI bierze do nauki wygenerowane dane
+val: datasets/manual/valid/images # Walidacja ZAWSZE tylko na danych ręcznych!
+
+nc: 1
+names: ['sandbag']
