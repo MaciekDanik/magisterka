@@ -1,0 +1,23 @@
+import os
+
+# sacred dataset
+# images_dir = 'S:/MyFiles/Studia/Magisterskie/Sem3/magisterka/datasets/test_sacred/images'
+# labels_dir = 'S:/MyFiles/Studia/Magisterskie/Sem3/magisterka/datasets/test_sacred/labels'
+
+# generative negatives
+images_dir = 'S:/MyFiles/Studia/Magisterskie/Sem3/magisterka/datasets/generative_negatives/images'
+labels_dir = 'S:/MyFiles/Studia/Magisterskie/Sem3/magisterka/datasets/generative_negatives/labels'
+
+images = [f for f in os.listdir(images_dir) if f.endswith(('.jpg', '.png', '.jpeg'))]
+
+count = 0
+for img_name in images:
+    txt_name = os.path.splitext(img_name)[0] + '.txt'
+    txt_path = os.path.join(labels_dir, txt_name)
+
+    if not os.path.exists(txt_path):
+        with open(txt_path, 'w') as f:
+            pass  # create an empty file
+        count += 1
+
+print(f"Created {count} empty label files.")

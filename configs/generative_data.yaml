@@ -1,0 +1,7 @@
+train: 
+  - ../datasets/manual/train/images            # Twój oryginalny zbiór (człowiek)
+  - ../datasets/generative_negatives/images    # Twój zbiór dyfuzyjny (puste tła)
+val: ../datasets/manual/valid/images           # Walidacja zawsze na starym zbiorze
+
+nc: 1
+names: ['sandbag']

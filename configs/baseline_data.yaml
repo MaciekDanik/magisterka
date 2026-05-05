@@ -1,0 +1,5 @@
+train: ../datasets/manual/train/images
+val: ../datasets/manual/valid/images
+
+nc: 1
+names: ['sandbag']
