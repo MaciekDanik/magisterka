@@ -3,17 +3,19 @@ import copy
 from config import get_config, get_absolute_path
 
 def get_model(model_type, checkpoint_path):
-    """Instantiates the correct model class based on model_type ('yolo' or 'rtdetr')."""
-    if model_type.lower() == 'yolo':
+    """Instantiates the correct model class based on model_type ('yolov8', 'yolo26', or 'rtdetr')."""
+    if model_type.lower() in ('yolo', 'yolov8', 'yolo26'):
         return YOLO(checkpoint_path)
     elif model_type.lower() == 'rtdetr':
         return RTDETR(checkpoint_path)
     else:
-        raise ValueError(f"Unknown model_type: {model_type}. Use 'yolo' or 'rtdetr'.")
+        raise ValueError(f"Unknown model_type: {model_type}. Use 'yolov8', 'yolo26', or 'rtdetr'.")
 
 def get_default_weights(model_type):
-    if model_type.lower() == 'yolo':
-        return get_absolute_path('models/pretrained/yolov8n-seg.pt')
+    if model_type.lower() == 'yolov8':
+        return get_absolute_path('models/pretrained/yolov8n.pt')
+    elif model_type.lower() == 'yolo26':
+        return get_absolute_path('models/pretrained/yolo26n.pt')
     return get_absolute_path('models/pretrained/rtdetr-l.pt')
 
 def run_baseline(model_type='yolo', initial_weights=None, data_yaml='configs/baseline_data.yaml', overrides=None):

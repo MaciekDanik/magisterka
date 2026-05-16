@@ -18,49 +18,71 @@ def main():
     if args.batch_size is not None: overrides['batch'] = args.batch_size
 
     print("=========================================================")
-    print("   MASTER TRAINING ORCHESTRATOR: YOLO & RT-DETR")
+    print("   MASTER TRAINING ORCHESTRATOR: YOLOv8, YOLO26 & RT-DETR")
     print(f"   OVERRIDES: {overrides}")
     print("=========================================================\n")
     
-    # ====== YOLO PIPELINE ======
+    # ====== YOLOv8 PIPELINE ======
     try:
-        print("[PIPELINE] 1. YOLO Baseline")
-        yolo_base_weights = run_baseline(model_type='yolo', data_yaml='configs/baseline_data.yaml', overrides=overrides)
+        print("[PIPELINE] 1. YOLOv8 Baseline")
+        yolov8_base_weights = run_baseline(model_type='yolov8', data_yaml='configs/baseline_data.yaml', overrides=overrides)
     except Exception as e:
-        print("\n[ERROR] Failed during YOLO Baseline:")
+        print("\n[ERROR] Failed during YOLOv8 Baseline:")
         traceback.print_exc()
         
     try:
-        print("[PIPELINE] 2. YOLO SSL Pseudo Labels")
-        yolo_pseudo_weights = run_ssl_pseudo_labels(model_type='yolo', iterations=args.iterations, data_yaml='configs/student_data.yaml', overrides=overrides)
+        print("[PIPELINE] 2. YOLOv8 SSL Pseudo Labels")
+        yolov8_pseudo_weights = run_ssl_pseudo_labels(model_type='yolov8', iterations=args.iterations, data_yaml='configs/student_data.yaml', overrides=overrides)
     except Exception as e:
-        print("\n[ERROR] Failed during YOLO SSL Pseudo Labels:")
+        print("\n[ERROR] Failed during YOLOv8 SSL Pseudo Labels:")
         traceback.print_exc()
         
     try:
-        print("[PIPELINE] 3. YOLO SSL Generative Negative Samples")
-        yolo_gen_weights = run_ssl_generative(model_type='yolo', data_yaml='configs/generative_data.yaml', overrides=overrides)
+        print("[PIPELINE] 3. YOLOv8 SSL Generative Negative Samples")
+        yolov8_gen_weights = run_ssl_generative(model_type='yolov8', data_yaml='configs/generative_data.yaml', overrides=overrides)
     except Exception as e:
-        print("\n[ERROR] Failed during YOLO SSL Generative Negative:")
+        print("\n[ERROR] Failed during YOLOv8 SSL Generative Negative:")
+        traceback.print_exc()
+
+    # ====== YOLO26 PIPELINE ======
+    try:
+        print("[PIPELINE] 4. YOLO26 Baseline")
+        yolo26_base_weights = run_baseline(model_type='yolo26', data_yaml='configs/baseline_data.yaml', overrides=overrides)
+    except Exception as e:
+        print("\n[ERROR] Failed during YOLO26 Baseline:")
+        traceback.print_exc()
+        
+    try:
+        print("[PIPELINE] 5. YOLO26 SSL Pseudo Labels")
+        yolo26_pseudo_weights = run_ssl_pseudo_labels(model_type='yolo26', iterations=args.iterations, data_yaml='configs/student_data.yaml', overrides=overrides)
+    except Exception as e:
+        print("\n[ERROR] Failed during YOLO26 SSL Pseudo Labels:")
+        traceback.print_exc()
+        
+    try:
+        print("[PIPELINE] 6. YOLO26 SSL Generative Negative Samples")
+        yolo26_gen_weights = run_ssl_generative(model_type='yolo26', data_yaml='configs/generative_data.yaml', overrides=overrides)
+    except Exception as e:
+        print("\n[ERROR] Failed during YOLO26 SSL Generative Negative:")
         traceback.print_exc()
 
     # ====== RT-DETR PIPELINE ======
     try:
-        print("[PIPELINE] 4. RT-DETR Baseline")
+        print("[PIPELINE] 7. RT-DETR Baseline")
         rtdetr_base_weights = run_baseline(model_type='rtdetr', data_yaml='configs/baseline_data.yaml', overrides=overrides)
     except Exception as e:
         print("\n[ERROR] Failed during RT-DETR Baseline:")
         traceback.print_exc()
         
     try:
-        print("[PIPELINE] 5. RT-DETR SSL Pseudo Labels")
+        print("[PIPELINE] 8. RT-DETR SSL Pseudo Labels")
         rtdetr_pseudo_weights = run_ssl_pseudo_labels(model_type='rtdetr', iterations=args.iterations, data_yaml='configs/student_data.yaml', overrides=overrides)
     except Exception as e:
         print("\n[ERROR] Failed during RT-DETR SSL Pseudo Labels:")
         traceback.print_exc()
         
     try:
-        print("[PIPELINE] 6. RT-DETR SSL Generative Negative Samples")
+        print("[PIPELINE] 9. RT-DETR SSL Generative Negative Samples")
         rtdetr_gen_weights = run_ssl_generative(model_type='rtdetr', data_yaml='configs/generative_data.yaml', overrides=overrides)
     except Exception as e:
         print("\n[ERROR] Failed during RT-DETR SSL Generative Negative:")

@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 
-model = YOLO('yolov8n-seg.pt')
+model = YOLO('yolov8n.pt')
 
 results = model.train(
     data='./datasets/dataset_yolov8_V1/data.yaml',
@@ -12,8 +12,8 @@ results = model.train(
     lrf=0.01,
     task='segment',
     cache=False,
-    # device='cpu',
-    device=0,
+    device='cpu',
+    # device=0,
     cos_lr=True,
     optimizer='auto',
     name='yolov8_sandbag_seg_v5',
