@@ -9,7 +9,7 @@ DEFAULT_DEVICE = 0 if torch.cuda.is_available() else 'cpu'
 
 BASE_TRAINING_CONFIG = {
     'task': 'detect',
-    'epochs': 100, # Default to 100 for actual training
+    'epochs': 500, # Default to 100 for actual training
     'patience': 50,
     'imgsz': 640,
     'batch': 16,

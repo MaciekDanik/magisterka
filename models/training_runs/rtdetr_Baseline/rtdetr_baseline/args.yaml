@@ -1,8 +1,8 @@
 task: detect
 mode: train
-model: S:\MyFiles\Studia\Magisterskie\Sem3\magisterka\models\pretrained\rtdetr-l.pt
-data: S:\MyFiles\Studia\Magisterskie\Sem3\magisterka\configs\baseline_data.yaml
-epochs: 1
+model: /workspace/models/pretrained/rtdetr-l.pt
+data: /workspace/configs/baseline_data.yaml
+epochs: 10
 time: null
 patience: 50
 batch: 16
@@ -10,9 +10,9 @@ imgsz: 640
 save: true
 save_period: 20
 cache: false
-device: cpu
+device: '0'
 workers: 8
-project: S:\MyFiles\Studia\Magisterskie\Sem3\magisterka\models\training_runs\rtdetr_Baseline
+project: /workspace/models/training_runs/rtdetr_Baseline
 name: rtdetr_baseline
 exist_ok: false
 pretrained: true
@@ -107,4 +107,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: S:\MyFiles\Studia\Magisterskie\Sem3\magisterka\models\training_runs\rtdetr_Baseline\rtdetr_baseline
+save_dir: /workspace/models/training_runs/rtdetr_Baseline/rtdetr_baseline

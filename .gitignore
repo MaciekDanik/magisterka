@@ -1,0 +1,4 @@
+models/training_runs/**/*.pt
+models/training_runs/**/weights/
+yolo26n.pt
+*.pt
