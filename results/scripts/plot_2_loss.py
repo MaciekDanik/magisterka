@@ -1,6 +1,7 @@
 import os
 import glob
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -43,30 +44,46 @@ def main():
     for arch_display, arch_prefix in architectures.items():
         path_baseline = find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline"))
         path_generative = find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative"))
+        path_pseudo = find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo"))
         
         fig, ax = plt.subplots(figsize=(10, 6))
         
-        if path_baseline and os.path.exists(path_baseline) and path_generative and os.path.exists(path_generative):
+        if path_baseline and os.path.exists(path_baseline) and path_generative and os.path.exists(path_generative) and path_pseudo and os.path.exists(path_pseudo):
             epochs_b, loss_b = get_loss_curve(path_baseline)
             epochs_g, loss_g = get_loss_curve(path_generative)
+            epochs_p, loss_p = get_loss_curve(path_pseudo)
             
-            min_loss_idx = loss_b.argmin()
-            min_epoch = epochs_b[min_loss_idx]
+            import numpy as np
+            min_epoch_b = epochs_b[np.nanargmin(loss_b)]
+            min_epoch_p = epochs_p[np.nanargmin(loss_p)]
+            min_epoch_g = epochs_g[np.nanargmin(loss_g)]
             
             sns.lineplot(x=epochs_b, y=loss_b, label="Baseline", linewidth=2.5, color='darkblue', ax=ax)
+            sns.lineplot(x=epochs_p, y=loss_p, label="Metoda A (Pseudo-etykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
             sns.lineplot(x=epochs_g, y=loss_g, label="Metoda B (Syntetyczne Tło)", linewidth=2.5, color='darkorange', ax=ax)
             
-            ax.axvline(x=min_epoch, color='red', linestyle='--', label=f"Początek przeuczenia (Epoka {int(min_epoch)})")
+            ax.axvline(x=min_epoch_b, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. Baseline (Epoka {int(min_epoch_b)})")
+            ax.axvline(x=min_epoch_p, color='#2ca02c', linestyle='--', alpha=0.7, label=f"Min. Metoda A (Epoka {int(min_epoch_p)})")
+            ax.axvline(x=min_epoch_g, color='darkorange', linestyle='--', alpha=0.7, label=f"Min. Metoda B (Epoka {int(min_epoch_g)})")
         else:
             print(f"Brak pełnych danych dla {arch_display}. Używam mock data.")
             import numpy as np
             epochs_mock = np.arange(1, 101)
             loss_b = np.concatenate([np.linspace(2.5, 1.5, 30), np.linspace(1.5, 2.5, 70)]) + np.random.normal(0, 0.05, 100)
+            loss_p = np.concatenate([np.linspace(2.5, 1.0, 50), np.linspace(1.0, 0.9, 50)]) + np.random.normal(0, 0.02, 100)
             loss_g = np.concatenate([np.linspace(2.5, 1.2, 70), np.linspace(1.2, 1.2, 30)]) + np.random.normal(0, 0.03, 100)
             
+            min_epoch_b_mock = epochs_mock[loss_b.argmin()]
+            min_epoch_p_mock = epochs_mock[loss_p.argmin()]
+            min_epoch_g_mock = epochs_mock[loss_g.argmin()]
+            
             sns.lineplot(x=epochs_mock, y=loss_b, label="Baseline", linewidth=2.5, color='darkblue', ax=ax)
+            sns.lineplot(x=epochs_mock, y=loss_p, label="Metoda A (Pseudo-etykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
             sns.lineplot(x=epochs_mock, y=loss_g, label="Metoda B (Syntetyczne Tło)", linewidth=2.5, color='darkorange', ax=ax)
-            ax.axvline(x=30, color='red', linestyle='--', label="Początek przeuczenia (Baseline)")
+            
+            ax.axvline(x=min_epoch_b_mock, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. Baseline (Epoka {int(min_epoch_b_mock)})")
+            ax.axvline(x=min_epoch_p_mock, color='#2ca02c', linestyle='--', alpha=0.7, label=f"Min. Metoda A (Epoka {int(min_epoch_p_mock)})")
+            ax.axvline(x=min_epoch_g_mock, color='darkorange', linestyle='--', alpha=0.7, label=f"Min. Metoda B (Epoka {int(min_epoch_g_mock)})")
 
         ax.set_xlabel("Epoka treningu", fontsize=12)
         ax.set_ylabel("Funkcja straty (Validation Loss)", fontsize=12)
