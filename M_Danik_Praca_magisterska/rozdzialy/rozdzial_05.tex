@@ -1,0 +1,316 @@
+\chapter{Eksperymenty i analiza wyników}
+
+W niniejszym rozdziale przedstawiono wyniki uzyskane podczas treningu i ewaluacji modeli detekcji w przygotowanym środowisku eksperymentalnym. Analizę rozpoczęto od oceny wariantów bazowych, aby następnie zweryfikować i porównać wpływ zaproponowanych metod badawczych opartych na iteracyjnym uczeniu pół-nadzorowanym (ang.\ \emph{Semi-Supervised Learning} -- SSL). Skuteczność rurociągu SSL zbadano w dwóch wariantach: z wykorzystaniem standardowego pseudo-etykietowania (Metoda A) oraz przy użyciu syntetycznie wygenerowanych danych nieoznakowanych (Metoda B). Wszystkie zaprezentowane poniżej wartości liczbowe metryk (w tym mAP oraz funkcje straty) wyznaczono na zbiorze walidacyjnym.
+
+\section{Ewaluacja modeli bazowych}
+
+\todo[inline]{Modele bazowe brzmią niezbyt dobrze przez to, że to kalka z języka angielskiego, a występują u Pana wielokrotnie w tekście...}
+
+Jako punkt odniesienia (ang.\ \emph{baseline}) w badaniach przyjęto modele wytrenowane wyłącznie na oryginalnym, małym zbiorze danych. Celem tej fazy było określenie bazowych wartości metryk ewaluacyjnych oraz identyfikacja głównych słabości architektur (takich jak skłonność do przeuczenia czy tzw.\ halucynacje na tle) przed zastosowaniem docelowego potoku SSL.
+
+\subsection{Wyniki dla architektury YOLOv8n i YOLOv26n}
+
+Warianty bazowe z rodziny YOLO zostały poddane procesowi uczenia zgodnie z przyjętymi hiperparametrami. Jak można zauważyć na profilach wydajności (Rysunek \ref{fig:radar_yolo8} i \ref{fig:radar_yolo26}) oraz wykresach słupkowych (Rysunek \ref{fig:bars_yolo8} i \ref{fig:bars_yolo26}), model YOLOv8n poradził sobie z zadaniem bazowym bardzo dobrze, osiągając na zbiorze walidacyjnym wysoką wartość metryki mAP@0.5 na poziomie 0.89. Charakteryzował się przy tym dobrym balansem między precyzją (0.87) a czułością (0.74). Z analizy krzywej straty walidacyjnej (Rysunek \ref{fig:loss_yolo8}) wynika, że model ten wykazywał dużą stabilność, a zjawisko przeuczenia (wyznaczone przez globalne minimum funkcji straty) zaczęło być widoczne dopiero w bardzo późnej fazie treningu (342. epoka).
+
+% MIEJSCE NA WYKRESY RADAROWE I SŁUPKOWE DLA YOLO
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_5_radar_YOLOv8.png}
+\caption{Zintegrowany Profil Wydajności Modelu - YOLOv8n (Żródło: opracowanie własne).}
+\label{fig:radar_yolo8}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_YOLOv8.png}
+\caption{Wpływ metod SSL na metryki detekcji - YOLOv8n (Żródło: opracowanie własne).}
+\label{fig:bars_yolo8}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_5_radar_YOLO26.png}
+\caption{Zintegrowany Profil Wydajności Modelu - YOLOv26n (Żródło: opracowanie własne).}
+\label{fig:radar_yolo26}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_YOLO26.png}
+\caption{Wpływ metod SSL na metryki detekcji - YOLOv26n (Żródło: opracowanie własne).}
+\label{fig:bars_yolo26}
+\end{figure}
+
+Z kolei model YOLOv26n osiągnął nieco niższe wyniki bazowe (mAP@0.5 równe 0.84, precyzja 0.80, czułość 0.77). Niższa precyzja sugeruje, że model ten miał większą tendencję do generowania fałszywych detekcji w obszarach tła. Analiza krzywej straty (Rysunek \ref{fig:loss_yolo26}) wykazała również, że YOLOv26n szybciej zaczął tracić zdolność do generalizacji -- początek przeuczenia zaobserwowano na wykresie znacznie wcześniej, w okolicach 233. epoki.
+
+\todo[inline]{Uwaga, poniżej todos w wykresach -- może dziwnie się wyświetlać... Dodatkowo: do wykresów zastanowiłbym się czy nie dodać wszędzie informacji na jakim zbiorze pokazuje Pan metryki.}
+
+% MIEJSCE NA NOWE WYKRESY FUNKCJI STRATY (ANALIZA PRZEUCZENIA) DLA YOLO
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_2_loss_YOLOv8.png}
+\caption{Analiza zjawiska przeuczenia (krzywe straty walidacyjnej) \todo{brzmi źle, może po prostu krzywa straty dla danych ze zbioru walidacyjnego} - YOLOv8n (Żródło: opracowanie własne).}
+\label{fig:loss_yolo8}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_2_loss_YOLO26.png}
+\caption{Analiza zjawiska przeuczenia (krzywe straty walidacyjnej) - YOLOv26n (Żródło: opracowanie własne).}
+\label{fig:loss_yolo26}
+\end{figure}
+
+\subsection{Wyniki dla architektury RT-DETR-L}
+
+Analogicznemu procesowi ewaluacji poddano model RT-DETR-L. Jako że jest to architektura oparta na transformerach wizyjnych, weryfikacji podlegała jej dynamika zbieżności w reżimie braku dużej ilości danych.
+
+Bazowe wyniki metryk dla RT-DETR-L (Rysunek \ref{fig:radar_rtdetr} i \ref{fig:bars_rtdetr}) okazały się bardzo zadowalające (mAP@0.5 równe 0.88, precyzja 0.83, czułość 0.82). Model świetnie radził sobie z lokalizacją obiektów, jednak spojrzenie na krzywą straty walidacyjnej (Rysunek \ref{fig:loss_rtdetr}) obnaża jego kluczową słabość. Początkowa faza treningu wykazywała ogromne oscylacje i niestabilność. Choć globalne minimum straty przypada na 169. epokę, to wysoka ,,nerwowość'' krzywej potwierdza skłonność transformerów do zapamiętywania małych zbiorów treningowych kosztem płynnego nabywania zdolności generalizacji na nowe dane.
+
+% MIEJSCE NA WYKRESY DLA RT-DETR
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_5_radar_RT-DETR-L.png}
+\caption{Zintegrowany Profil Wydajności Modelu - RT-DETR-L (Żródło: opracowanie własne).}
+\label{fig:radar_rtdetr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_RT-DETR-L.png}
+\caption{Wpływ metod SSL na metryki detekcji - RT-DETR-L (Żródło: opracowanie własne).}
+\label{fig:bars_rtdetr}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_2_loss_RT-DETR-L.png}
+\caption{Analiza zjawiska przeuczenia (krzywa straty walidacyjnej) - RT-DETR-L (Żródło: opracowanie własne).}
+\label{fig:loss_rtdetr}
+\end{figure}
+
+\section{Eksperyment A: Uczenie pół-nadzorowane (SSL Pseudo)}
+
+W odpowiedzi na ograniczenia zidentyfikowane w wariantach bazowych, zastosowano iteracyjne uczenie pół-nadzorowane. W Metodzie A (oznaczonej jako SSL Pseudo) wykorzystano surowe dane nieoznakowane, które przechodziły przez cykl generowania pseudo-etykiet w architekturze Nauczyciel-Uczeń.
+
+\subsection{Wyniki dla architektury YOLOv8n i YOLOv26n}
+
+Proces iteracyjnego uczenia z pseudo-etykietami przyniósł skrajnie odmienne rezultaty dla obu wariantów YOLO. Jak wskazuje wykres podatności architektur (Rysunek \ref{fig:susceptibility} \todo{sprawdzić odwołanie} zamieszczony w końcowej części rozdziału), wdrożenie tej metody spowodowało spadek parametru mAP@0.5 dla modelu YOLOv8n o 1.4 p.p. względem wariantu bazowego. O ile czułość modelu wzrosła do 0.78, to precyzja nieznacznie spadła do 0.86. Można to wytłumaczyć zjawiskiem \emph{confirmation bias} – niedoskonałe pseudo-etykiety wygenerowane w pierwszych iteracjach potoku SSL wprowadziły szum, który osłabił pewność bazowego modelu. Przyspieszyło to również moment przeuczenia sieci z 342. do 275. epoki (zgodnie z wykresem straty, Rys. \ref{fig:loss_yolo8}).
+
+Zupełnie inaczej zareagował model YOLOv26n. Zastosowanie metody SSL Pseudo pozwoliło mu poprawić mAP@0.5 o 2.5 p.p. (wzrost do 0.87). Zarówno precyzja, jak i czułość uległy poprawie. Przetworzenie dodatkowych, nieoznakowanych danych w pętli Nauczyciel-Uczeń zadziałało tu jak skuteczny regularyzator, pozwalając modelowi zredukować liczbę fałszywych alarmów, z którymi zmagał się w wariancie Baseline. Co więcej, dodanie tych danych znacząco opóźniło zjawisko przeuczenia, przesuwając minimum funkcji straty z 233. aż na 283. epokę (Rysunek \ref{fig:loss_yolo26}).
+
+% MIEJSCE NA KRZYWE UCZENIA mAP (YOLO)
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_4_konwergencja_YOLOv8.png}
+\caption{Krzywa uczenia metryki mAP@0.5 - YOLOv8n (Żródło: opracowanie własne).}
+\label{fig:map_yolo8}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_4_konwergencja_YOLO26.png}
+\caption{Krzywa uczenia metryki mAP@0.5 - YOLOv26n (Żródło: opracowanie własne).}
+\label{fig:map_yolo26}
+\end{figure}
+
+\subsection{Wyniki dla architektury RT-DETR-L}
+
+Dla detektora RT-DETR-L wdrożenie Metody A przyniosło marginalny wzrost globalnej metryki mAP@0.5 (+0.3 p.p., utrzymując się na poziomie ok. 0.88), jednak kluczowa okazała się zmiana dynamiki samego treningu. 
+
+Z analizy krzywej uczenia (mAP na przestrzeni epok, Rysunek \ref{fig:map_rtdetr}) dla RT-DETR-L wyraźnie wynika, że zastosowanie SSL Pseudo znacząco ustabilizowało proces zbiegania modelu. Zredukowane zostały duże wzrosty i spadki widoczne w wariancie bazowym. Wskazuje to, że wstrzyknięcie dodatkowych danych za pomocą pseudo-etykiet pozwala transformerom złagodzić ich naturalną skłonność do przeuczenia, dostarczając niezbędnej różnorodności w procesie uczenia. Potwierdza to również znaczące przesunięcie minimum straty walidacyjnej – z 169. wariantu bazowego na 284. epokę dla wariantu SSL Pseudo (Rysunek \ref{fig:loss_rtdetr}).
+
+% MIEJSCE NA KRZYWĄ UCZENIA mAP (RT-DETR)
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_4_konwergencja_RT-DETR-L.png}
+\caption{Krzywa uczenia metryki mAP@0.5 - RT-DETR-L (Żródło: opracowanie własne).}
+\label{fig:map_rtdetr}
+\end{figure}
+
+\section{Eksperyment B: Uczenie pół-nadzorowane z syntetycznym tłem (SSL Generative)}
+
+W drugim eksperymencie proces SSL rozszerzono o syntetycznie wygenerowane próbki negatywne (Metoda B). Do zbioru dodano obrazy przedstawiające różne typy tła bez obiektów docelowych. Rozwiązanie to miało zwiększyć różnorodność danych treningowych i ograniczyć liczbę fałszywych detekcji związanych z przeuczeniem modelu na konkretnych fragmentach tła.
+
+\subsection{Analiza wyników dla modeli YOLO}
+
+Dodanie syntetycznie wygenerowanych próbek negatywnych do procesu SSL ponownie obniżyło skuteczność modelu YOLOv8n (spadek mAP@0.5 o 1.8 p.p.). Największy spadek odnotowano dla precyzji, która zmniejszyła się z 0.87 do 0.81. Wyniki sugerują, że model miał trudności z adaptacją do większej różnorodności teł wprowadzonych do zbioru treningowego, co zdestabilizowało wyuczone wcześniej cechy i przyspieszyło przeuczenie sieci do 246. epoki (Rysunek~\ref{fig:loss_yolo8}).
+
+Odmiennie zachował się model YOLOv26n, który w tym eksperymencie osiągnął najlepsze wyniki spośród wszystkich testowanych wariantów. Zastosowanie metody SSL Generative zwiększyło wartość mAP@0.5 o 3.4 p.p., osiągając ostatecznie wynik 0.88. Poprawie uległy również precyzja i czułość modelu, które wzrosły odpowiednio do 0.82 i 0.81. Dodatkowe próbki negatywne mogły przyczynić się do lepszego rozróżniania obiektów docelowych od tła, co zredukowało liczbę fałszywych detekcji. Na ograniczenie przeuczenia może wskazywać przesunięcie minimum straty walidacyjnej, które przesunęło się z 233. (dla bazy) aż na 445. epokę treningu (Rysunek \ref{fig:loss_yolo26}).
+
+\subsection{Analiza wyników dla RT-DETR-L}
+
+Dla architektury RT-DETR-L wykorzystanie potoku SSL rozszerzonego o dane syntetyczne nie przyniosło poprawy wyników i spowodowało znaczący spadek skuteczności detekcji. Model odnotował największy spadek mAP@0.5 w całym zestawieniu (-3.7 p.p. względem bazy, kończąc na 0.84). 
+
+Dodatkowo analiza krzywej uczenia modelu RT-DETR-L (Rysunek \ref{fig:map_rtdetr}) wskazuje, że w przypadku Metody B proces treningu stał się krytycznie niestabilny. W okolicach 135. epoki metryka mAP dla tego wariantu drastycznie spadła niemal do zera, co pokrywa się z załamaniem uczenia sieci. Wyniki te jasno sugerują, że nienaturalne artefakty wprowadzone w tłach obrazów zaburzyły kluczowy dla transformerów mechanizm samo-uwagi, doprowadzając do zapominania i destrukcji wag modelu podczas cyklu uczeń-nauczyciel.
+
+\section{Wybrane przykłady predykcji}
+
+\todo[inline]{na pewno zmiana nazwy podrozdziału - analiza jakościowa to bardzo konkretnie zagadnienie, niekoniecznie ma zastosowanie w Pana badaniach -- drobny przykład (zakomentowany, aby nie psuć kompilacji dokumentu): %https://www.cfasofficial.com/pl/strefa-wiedzy/analiza-jakosciowa-vs-ilosciowa/ 
+}
+
+Poniżej przedstawiono przykładowe predykcje modeli dla obrazów z wyizolowanego zbioru \emph{Test-Sacred} (umieszczone również w Dodatku A \ref{Dodatek_A} \todo{nie ma sensu umieszczać tego samego dwukrotnie, sprawdzić czy nie miał Pan na myśli: 'uzupełnione dodatkowymi przykładami w Dodatku A'}), które nie były wykorzystywane na żadnym etapie treningu ani walidacji. Analiza jakościowa ma na celu wizualną weryfikację skuteczności detekcji, liczby błędnych wskazań oraz zdolności modeli do generalizacji. Dodatkowo w tabelach przedstawiono wartości mediany pewności, średniej pewności oraz liczby detekcji na zdjęciu dla poszczególnych modeli.
+
+\subsection{Predykcje modeli bazowych}
+\begin{figure}[htbp]
+    \centering
+    \subfloat[][YOLOv8n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO8/Baseline/sacred_1_R001_C003.jpg}
+    \label{fig:baseline_yolov8n}}
+    \quad
+    \subfloat[][YOLOv26n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO26/Baseline/sacred_1_R001_C003.jpg}
+    \label{fig:baseline_yolov26n}}
+    \quad
+    \subfloat[][RT-DETR-L]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Baseline/sacred_1_R001_C003.jpg}
+    \label{fig:baseline_rtdetr}}
+    \caption{Porównanie predykcji modeli bazowych dla obrazu spoza zbioru treningowego (Żródło: opracowanie własne).}
+    \label{fig:baseline_comparison}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Średnia pewność, mediana pewności oraz liczba detekcji modeli bazowych (Żródło: opracowanie własne).}
+\label{tab:baseline_stats}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Baseline} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
+Mediana           & 0.5588           & 0.6549            & 0.6454             \\ \hline
+Średnia           & 0.5875           & 0.5830            & 0.6400               \\ \hline
+Liczba detekcji   & 14               & 6                 & 13                 \\ \hline
+\end{tabular}
+\end{table}
+
+Analiza rysunku \ref{fig:baseline_comparison} oraz danych ilościowych z tabeli \ref{tab:baseline_stats} jednoznacznie ukazuje problemy modeli bazowych trenowanych na małym zbiorze. Zarówno model YOLOv8n, jak i oparty na transformerach RT-DETR-L wykazują silną tendencję do generowania fałszywie pozytywnych wskazań (ang.\ \emph{False Positives}), lokalizując odpowiednio 14 i 13 potencjalnych obiektów, z czego większość stanowi tło. Mediana pewności waha się w przedziale 0.55--0.64, co świadczy o braku pewności decyzyjnej układu. Wyjątek stanowi model YOLOv26n, który zachował wyższy stopień konserwatyzmu (zaledwie 6 detekcji).
+
+\subsection{Predykcje modeli z Metody A (SSL Pseudo)}
+\begin{figure}[htbp]
+    \centering
+    \subfloat[][YOLOv8n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO8/Pseudo/sacred_1_R001_C003.jpg}
+    \label{fig:pseudo_yolov8n}}
+    \quad
+    \subfloat[][YOLOv26n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO26/Pseudo/sacred_1_R001_C003.jpg}
+    \label{fig:pseudo_yolov26n}}
+    \quad
+    \subfloat[][RT-DETR-L]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Pseudo/sacred_1_R001_C003.jpg}
+    \label{fig:pseudo_rtdetr}}
+    \caption{Porównanie predykcji modeli po zastosowaniu pseudo-etykietowania (Żródło: opracowanie własne).}
+    \label{fig:pseudo_comparison}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Średnia pewność, mediana pewności oraz liczba detekcji modeli dla metody SSL Pseudo (Żródło: opracowanie własne).}
+\label{tab:pseudo_stats}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{SSL Pseudo} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
+Mediana             & 0.6490           & 0.8332            & 0.8613             \\ \hline
+Średnia             & 0.6752           & 0.6922            & 0.6911             \\ \hline
+Liczba detekcji     & 7                & 6                 & 7                  \\ \hline
+\end{tabular}
+\end{table}
+
+
+\todo[inline]{Poprawiłbym tabele: Zamiast baseline po prostu model (wszystkie 3 modele są Pana baselinem). Koniecznie dodał Również informację o tym czego są to mediany/średnie. Jak ma się liczba detekcji do poprawnej liczby detekcji co jest w sumie najważniejsze? (Kolejny wiersz?).}
+Zastosowanie iteracyjnego pseudo-etykietowania przyniosło zauważalną poprawę jakości wnioskowania. Jak wynika z tabeli \ref{tab:pseudo_stats}, liczba detekcji dla modeli YOLOv8n i RT-DETR-L spadła o niemal połowę, co wskazuje na ograniczenie liczby błędnych detekcji w obszarach tła. Jednocześnie zaobserwowano wyraźny wzrost mediany pewności -- szczególnie dla modelu RT-DETR-L (wzrost do 0.86) oraz YOLOv26n (wzrost do 0.83).
+
+\subsection{Predykcje modeli z Metody B (SSL Generative)}
+\begin{figure}[htbp]
+    \centering
+    \subfloat[][YOLOv8n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO8/Generative/sacred_1_R001_C003.jpg}
+    \label{fig:generative_yolov8n}}
+    \quad
+    \subfloat[][YOLOv26n]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/YOLO26/Generative/sacred_1_R001_C003.jpg}
+    \label{fig:generative_yolov26n}}
+    \quad
+    \subfloat[][RT-DETR-L]{
+    \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Generative/sacred_1_R001_C003.jpg}
+    \label{fig:generative_rtdetr}}
+    \caption{Porównanie predykcji modeli po włączeniu syntetycznych próbek tła (Żródło: opracowanie własne).}
+    \label{fig:generative_comparison}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\caption{Średnia pewność, mediana pewności oraz liczba detekcji modeli dla metody SSL Generative (Żródło: opracowanie własne).}
+\label{tab:generative_stats}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{SSL Generative} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
+Mediana                 & 0.7985           & 0.8009            & 0.3818             \\ \hline
+Średnia                 & 0.7137           & 0.7599            & 0.4728             \\ \hline
+Liczba detekcji         & 7                & 5                 & 17                 \\ \hline
+\end{tabular}
+\end{table}
+
+Dodanie syntetycznych obrazów tła (Metoda B) uwidoczniło różnice w zachowaniu poszczególnych architektur. Dla modeli splotowych (YOLOv8n i YOLOv26n) metoda przyniosła korzystne wyniki -- utrzymały rygorystyczną liczbę detekcji (7 i 5), a mediana pewności wyniosła około 0.80. Wyniki sugerują, że wygenerowane tła pełniły funkcję dodatkowych przykładów negatywnych.
+
+Odmienne zachowanie zaobserwowano dla modelu RT-DETR-L (architektura typu transformer). Wprowadzenie syntetycznych danych doprowadziło do pogorszenia wyników generalizacji. Liczba wskazanych obiektów wzrosła do 17, przy spadku mediany pewności do zaledwie 0.38. Jedną z możliwych przyczyn jest uczenie się zależności obecnych w danych syntetycznych, które nie występowały w danych rzeczywistych.
+
+\section{Analiza statystyczna istotności detekcji}
+
+\todo[inline]{Porozmawiać o tej części...}
+
+W celu obiektywnej weryfikacji skuteczności zastosowanych technik SSL (pseudo-etykietowanie oraz syntetyczne próbki tła), przeprowadzono analizę statystyczną różnic w liczbie fałszywych detekcji. Głównym celem tej analizy było potwierdzenie, czy proponowane metody stanowią skuteczny mechanizm redukcji tzw. ,,halucynacji'' modelu, co stanowi jeden z kluczowych problemów w reżimie małego zbioru danych.
+\subsection{Metodyka testów}
+Podstawowym wyzwaniem w standardowej analizie agregowanej (np. globalnym mAP) jest fakt, że eksperymenty typu \textit{single-seed} dostarczają tylko jednego wyniku zbiorczego, co ogranicza moc statystyczną oceny. W niniejszej pracy wyliczono liczbę fałszywych detekcji (FP) osobno dla każdego z 43 kadrów ewaluacyjnych. Dzięki takiemu podejściu uzyskano dla każdego modelu wektor obserwacji, co umożliwiło przeprowadzenie testów nieparametrycznych.
+Ze względu na niespełnienie założeń o rozkładzie normalnym wyników oraz charakter prób powiązanych (ten sam zbiór testowy dla modeli bazowych i wariantów SSL), zastosowano test znakowanych rang Wilcoxona. Jest to test jednostronny, sprawdzający, czy zastosowana metoda istotnie redukuje liczbę fałszywych detekcji względem wariantu bazowego. Za próg istotności statystycznej przyjęto wartość p<0.05.
+
+\subsection{Wyniki analizy}
+Zestawienie wyników testu statystycznego przedstawiono w Tabeli \ref{tab:stat_analysis}.
+
+\begin{table}[htbp]
+\centering
+\caption{Analiza statystyczna redukcji liczby fałszywych detekcji (FP) przy użyciu testu Wilcoxona (Żródło: opracowanie własne).}
+\label{tab:stat_analysis}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|c|c|c|c|}
+\hline
+\textbf{Architektura} & \textbf{Porównanie} & \textbf{Śr. FP (Base)} & \textbf{Śr. FP (Metoda)} & \textbf{p-value} & \textbf{Istotność (p<0.05)} \\ \hline
+\multirow{2}{*}{\textbf{YOLOv8}}
+ & Baseline vs SSL Pseudo & 13.37 & 11.88 & 0.0030 & TAK \\ \cline{2-6} 
+ & Baseline vs SSL Generative & 13.37 & 11.93 & 0.0012 & TAK \\ \hline
+\multirow{2}{*}{\textbf{YOLOv26}}
+ & Baseline vs SSL Pseudo & 10.00 & 10.88 & 0.9652 & NIE \\ \cline{2-6} 
+ & Baseline vs SSL Generative & 10.00 & 10.91 & 0.9626 & NIE \\ \hline
+\multirow{2}{*}{\textbf{RT-DETR-L}}
+ & Baseline vs SSL Pseudo & 15.51 & 14.14 & 0.0103 & TAK \\ \cline{2-6} 
+ & Baseline vs SSL Generative & 15.51 & 20.23 & 0.9997 & NIE \\ \hline
+\end{tabular}%
+}
+\end{table}
+Uzyskane wyniki potwierdzają zróżnicowaną podatność architektur na zastosowane metody. W przypadku modelu YOLOv8n, obie metody SSL przyniosły statystycznie istotną redukcję fałszywych detekcji (p<0.05), co potwierdza ich skuteczność jako mechanizmów regularyzacji. W modelu RT-DETR-L istotną redukcję osiągnięto jedynie przy użyciu metody SSL Pseudo. Wynik negatywny dla metody SSL Generative w architekturze RT-DETR-L (p=0.9997) stanowi dobitny dowód na niestabilność transformerów wizyjnych w obliczu danych generatywnych, prowadzącą do wzrostu liczby fałszywych wskazań.
+
+\section{Podsumowanie i ostateczna analiza porównawcza}
+
+Szczegółowe zestawienie wszystkich monitorowanych metryk ewaluacyjnych (w tym parametru F1-Score) oraz punktów krytycznych treningu (epoka wystąpienia minimum straty walidacyjnej) dla każdego z badanych wariantów zaprezentowano w Tabeli \ref{tab:final_results}. 
+
+\input{Tables/results_table}
+
+Kompleksowe zestawienie wyników analizy ilościowej z oceną jakościową (predykcje ze zbioru \emph{Test-Sacred}) pozwala na sformułowanie wniosków dotyczących podatności badanych architektur na badane techniki. Na wykresie podatności można wyróżnić trzy różne profile zachowań sieci:
+
+% MIEJSCE NA WYKRES PODATNOŚCI
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\linewidth]{Pics/Charts/wykres_3_architektury.png}
+\caption{Podatność architektur na badane metody względem modelu bazowego (Żródło: opracowanie własne).}
+\label{fig:susceptibility}
+\end{figure}
+
+\begin{enumerate}
+\item \textbf{YOLOv8n (Model "nasycony"):} Architektura ta, startując z bardzo wysokiego poziomu bazowego, okazała się niepodatna na obie formy iteracyjnego SSL. Pseudo-etykietowanie i wariant generatywny przyniosły spadek metryk. Prawdopodobnie model ten wyciągnął\todo{kolokwializm do zmiany} maksimum informacji z oryginalnego rozkładu danych już w wersji bazowej, a każda niepewność wynikająca z automatycznego etykietowania działała na niego jak szum degenerujący precyzję. Zauważalna była jedynie niewielka poprawa w eliminacji halucynacji tła.
+
+\item \textbf{YOLOv26n (Główny beneficjent SSL):} Model ten zanotował zdecydowane wzrosty wydajności po zastosowaniu rurociągu SSL. Cierpiąc bazowo na nadmiar fałszywych detekcji, skutecznie wykorzystał dodatkowe dane nieoznakowane do regularyzacji. Wariant z syntetycznym tłem (+3.4 p.p.) sprawdził się tu lepiej niż klasyczne pseudo-etykiety (+2.5 p.p.), udowadniając, że wymuszenie na nowoczesnych modelach anchor-free niezależności od kontekstu to sprawdzona strategia.
+
+\item \textbf{RT-DETR-L (Podatność na \emph{domain shift}):} Model ten zachowywał się radykalnie inaczej. Standardowy proces SSL (Metoda A) poprawił stabilność treningu i opóźnił zjawisko przeuczenia. Jednakże dodanie syntetycznych próbek negatywnych (Metoda B) zniszczyło jego wyniki i załamało stabilność uczenia. Wskazuje to dobitnie, że potężna architektura oparta na transformerach, z racji braku \emph{inductive biases}, jest ekstremalnie wrażliwa na nienaturalne wzorce i artefakty (domain shift) generowane przez modele dyfuzyjne.
+\end{enumerate}
+
+Osiągnięte rezultaty udowadniają ostatecznie, że nie istnieje uniwersalny algorytm na optymalizację detektorów pracujących na małych zbiorach danych. Skuteczność danych nieoznakowanych oraz generowanych syntetycznie jest determinowana specyfiką architektoniczną wybranego układu wizyjnego (konwolucje kontra transformery).
+
+\todo[inline]{Przygotować się do obrony i pytania: czemu osobno testował Pan A, osobno B, ale nie obie te metody na raz?}
