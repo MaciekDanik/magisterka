@@ -1,0 +1,7 @@
+Model,Comparison,Mean_FP_Baseline,Mean_FP_Variant,p_value,Significant_Reduction
+YOLOV8,Baseline vs ssl_pseudo,13.3721,11.8837,0.003,TAK
+YOLOV8,Baseline vs ssl_generative,13.3721,11.9302,0.0012,TAK
+YOLO26,Baseline vs ssl_pseudo,10.0,10.8837,0.9652,NIE
+YOLO26,Baseline vs ssl_generative,10.0,10.907,0.9626,NIE
+RTDETR,Baseline vs ssl_pseudo,15.5116,14.1395,0.0103,TAK
+RTDETR,Baseline vs ssl_generative,15.5116,20.2326,0.9997,NIE

@@ -1,0 +1,7 @@
+Model,Comparison,Mean_F1_Baseline,Mean_F1_Variant,p_value,Significant_0.05
+YOLOV8,Baseline vs ssl_pseudo,0.0014,0.0,0.1797,False
+YOLOV8,Baseline vs ssl_generative,0.0014,0.0019,0.1797,False
+YOLO26,Baseline vs ssl_pseudo,0.0014,0.0015,0.3173,False
+YOLO26,Baseline vs ssl_generative,0.0014,0.0,0.3173,False
+RTDETR,Baseline vs ssl_pseudo,0.0003,0.002,0.1797,False
+RTDETR,Baseline vs ssl_generative,0.0003,0.0024,0.285,False
