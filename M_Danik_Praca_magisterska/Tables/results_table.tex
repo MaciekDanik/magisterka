@@ -1,21 +1,21 @@
 \begin{table}[htbp]
 \centering
-\caption{Szczegółowe zestawienie metryk ewaluacyjnych oraz epoki wystąpienia minimum funkcji straty (moment rozpoczęcia przeuczenia) [Żródło: opracowanie własne].}
+\caption{Szczegółowe zestawienie metryk ewaluacyjnych oraz epoki wystąpienia minimum funkcji straty na zbiorze walidacyjnym.}
 \label{tab:final_results}
 \resizebox{\textwidth}{!}{% Zmniejsza tabelę, jeśli wychodzi poza marginesy
 \begin{tabular}{|c|l|c|c|c|c|c|c|}
 \hline
-\textbf{Architektura} & \textbf{Metoda} & \textbf{mAP@0.5} & \textbf{mAP@0.5:0.95} & \textbf{Precyzja} & \textbf{Czułość} & \textbf{F1-Score} & \textbf{Przeuczenie (Epoka)} \\ \hline
+\textbf{Architektura} & \textbf{Metoda} & \textbf{mAP@0.5} & \textbf{mAP@0.5:0.95} & \textbf{Precyzja} & \textbf{Czułość} & \textbf{F1-score} & \textbf{Min. straty (epoka)} \\ \hline
 \multirow{3}{*}{\textbf{YOLOv8}}
- & Baseline & \textbf{0.882} & \textbf{0.650} & 0.845 & 0.777 & 0.809 & 256 \\ \cline{2-8} 
+ & Model odniesienia & \textbf{0.882} & \textbf{0.650} & 0.845 & 0.777 & 0.809 & 256 \\ \cline{2-8} 
  & Metoda A (Pseudo) & 0.859 & 0.623 & 0.812 & \textbf{0.811} & \textbf{0.812} & \textbf{275} \\ \cline{2-8} 
  & Metoda B (Generative) & 0.869 & 0.623 & \textbf{0.867} & 0.724 & 0.789 & 246 \\ \hline
 \multirow{3}{*}{\textbf{YOLOv26}}
- & Baseline & 0.823 & 0.592 & 0.807 & 0.737 & 0.770 & 233 \\ \cline{2-8} 
+ & Model odniesienia & 0.823 & 0.592 & 0.807 & 0.737 & 0.770 & 233 \\ \cline{2-8} 
  & Metoda A (Pseudo) & 0.857 & 0.621 & 0.819 & \textbf{0.782} & 0.800 & 283 \\ \cline{2-8} 
  & Metoda B (Generative) & \textbf{0.874} & \textbf{0.643} & \textbf{0.851} & 0.766 & \textbf{0.806} & \textbf{445} \\ \hline
 \multirow{3}{*}{\textbf{RT-DETR-L}}
- & Baseline & 0.877 & \textbf{0.677} & 0.829 & 0.817 & 0.823 & \textbf{230} \\ \cline{2-8} 
+ & Model odniesienia & 0.877 & \textbf{0.677} & 0.829 & 0.817 & 0.823 & \textbf{230} \\ \cline{2-8} 
  & Metoda A (Pseudo) & \textbf{0.880} & 0.675 & \textbf{0.844} & \textbf{0.830} & \textbf{0.837} & 126 \\ \cline{2-8} 
  & Metoda B (Generative) & 0.840 & 0.612 & 0.785 & 0.792 & 0.789 & 66 \\ \hline
 \end{tabular}%

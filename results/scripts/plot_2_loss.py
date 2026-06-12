@@ -87,7 +87,8 @@ def main():
 
         ax.set_xlabel("Epoka treningu", fontsize=12)
         ax.set_ylabel("Funkcja straty (Validation Loss)", fontsize=12)
-        ax.set_title(f"Analiza zjawiska przeuczenia - {arch_display}", fontsize=14)
+        ax.set_title(f"Krzywa straty walidacyjnej - {arch_display}", fontsize=14)
+        ax.set_ylim(0, 5)
         ax.legend()
         
         plt.tight_layout()

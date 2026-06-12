@@ -2,9 +2,11 @@
 \section{Dodatkowe predykcje}
 \label{Dodatek_A}
 
-\todo[inline]{Na pewno sugerowałbym, aby mimo tego, że to dodatek, to do każdego rysunku dodać opis w tekście z przypisem...}
+Dodatek zawiera uzupełniające przykłady predykcji dla obrazów ze zbioru \emph{Test-Sacred}. Rysunki zestawiają wyniki trzech analizowanych architektur dla tych samych kafelków, co pozwala porównać liczbę wskazań oraz stabilność detekcji poza zbiorem walidacyjnym.
 
-\subsection*{Predykcje modeli bazowych}
+\subsection*{Predykcje modeli odniesienia}
+
+Rysunki \ref{fig:baseline_comparison_1} oraz \ref{fig:baseline_comparison_2} przedstawiają działanie modeli odniesienia, trenowanych wyłącznie na ręcznie oznaczonym zbiorze bazowym. Zestawienie pokazuje, jak poszczególne architektury zachowują się bez dodatkowych danych nieoznakowanych lub syntetycznych.
 
 \begin{figure}[h]
     \centering
@@ -19,7 +21,7 @@
     \subfloat[][RT-DETR-L]{
     \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Baseline/sacred_1_R001_C001.jpg}
     \label{fig:baseline_rtdetr_1}}
-    \caption{Porównanie predykcji modeli bazowych dla obrazu spoza zbioru treningowego.}
+    \caption{Porównanie predykcji modeli odniesienia dla obrazu spoza zbioru treningowego.}
     \label{fig:baseline_comparison_1}
 \end{figure}
 
@@ -36,11 +38,13 @@
     \subfloat[][RT-DETR-L]{
     \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Baseline/sacred_3.jpg}
     \label{fig:baseline_rtdetr_2}}
-    \caption{Porównanie predykcji modeli bazowych dla obrazu spoza zbioru treningowego.}
+    \caption{Porównanie predykcji modeli odniesienia dla obrazu spoza zbioru treningowego.}
     \label{fig:baseline_comparison_2}
 \end{figure}
 
-\subsection*{Predykcje modeli z metody A}
+\subsection*{Predykcje modeli z~metody A}
+
+Rysunki \ref{fig:pseudo_comparison_1} oraz \ref{fig:pseudo_comparison_2} prezentują predykcje modeli po zastosowaniu iteracyjnego pseudoetykietowania. Przykłady te uzupełniają analizę ilościową, pokazując wpływ Metody A~na liczbę detekcji w~scenach spoza zbioru walidacyjnego.
 
 \begin{figure}[h]
     \centering
@@ -55,7 +59,7 @@
     \subfloat[][RT-DETR-L]{
     \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Pseudo/sacred_1_R001_C001.jpg}
     \label{fig:pseudo_rtdetr_1}}
-    \caption{Porównanie predykcji modeli po zastosowaniu pseudo-etykietowania dla obrazu spoza zbioru treningowego.}
+    \caption{Porównanie predykcji modeli po zastosowaniu pseudoetykietowania dla obrazu spoza zbioru treningowego.}
     \label{fig:pseudo_comparison_1}
 \end{figure}
 
@@ -72,11 +76,13 @@
     \subfloat[][RT-DETR-L]{
     \includegraphics[width = 0.3\textwidth]{Pics/Predictions/Sacred/RT-DETR-L/Pseudo/sacred_3.jpg}
     \label{fig:pseudo_rtdetr_2}}
-    \caption{Porównanie predykcji modeli po zastosowaniu pseudo-etykietowania dla obrazu spoza zbioru treningowego.}
+    \caption{Porównanie predykcji modeli po zastosowaniu pseudoetykietowania dla obrazu spoza zbioru treningowego.}
     \label{fig:pseudo_comparison_2}
 \end{figure}
 
-\subsection*{Predykcje modeli z metody B}
+\subsection*{Predykcje modeli z~metody B}
+
+Rysunki \ref{fig:generative_comparison_1}--\ref{fig:generative_comparison_3} przedstawiają predykcje modeli po włączeniu syntetycznych próbek tła. Szczególną uwagę zwraca porównanie zachowania modeli YOLO i~RT-DETR-L, ponieważ w~części ilościowej pracy metoda ta prowadziła do odmiennych rezultatów dla tych architektur.
 
 \begin{figure}[h]
     \centering

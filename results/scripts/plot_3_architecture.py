@@ -86,9 +86,9 @@ def main():
     
     ax.axhline(0, color='black', linewidth=1)
     
-    ax.set_ylabel("Zmiana mAP@50 względem modelu bazowego (p.p.)", fontsize=12)
+    ax.set_ylabel("Zmiana mAP@50 względem modelu odniesienia (p.p.)", fontsize=12)
     ax.set_xlabel("Architektura modeli", fontsize=12)
-    ax.set_title("Podatność architektur na metody Data Augmentation/SSL", fontsize=14)
+    ax.set_title("Zmiana jakości wyników modelu w zależności od architektury", fontsize=14)
     
     plt.tight_layout()
     save_path = os.path.join(out_dir, "wykres_3_architektury.png")
