@@ -21,7 +21,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Wybierany plik o największym rozmiarze (pełne uczenie setki epok)
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -33,13 +33,13 @@ def main():
         'RT-DETR-L': 'rtdetr'
     }
     
-    colors = {'Baseline': '#1f77b4', 'Metoda Mieszana (Pseudo)': '#2ca02c', 'Metoda Syntetyczna (Gen)': '#ff7f0e'}
+    colors = {'Model odniesienia': '#1f77b4', 'Metoda A (pseudoetykiety)': '#2ca02c', 'Metoda B (syntetyczne tła)': '#ff7f0e'}
     
     for arch_display, arch_prefix in architectures.items():
         runs = {
-            'Baseline': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
-            'Metoda Mieszana (Pseudo)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
-            'Metoda Syntetyczna (Gen)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
+            'Model odniesienia': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
+            'Metoda A (pseudoetykiety)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
+            'Metoda B (syntetyczne tła)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
         }
         
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -53,9 +53,9 @@ def main():
             else:
                 epochs_mock = np.arange(1, 101)
                 baseline = 0.8 / (1 + np.exp(-0.1 * (epochs_mock - 30))) + np.random.normal(0, 0.02, 100)
-                if name == 'Metoda Syntetyczna (Gen)':
+                if name == 'Metoda B (syntetyczne tła)':
                     mock_vals = 0.85 / (1 + np.exp(-0.15 * (epochs_mock - 20))) + np.random.normal(0, 0.015, 100)
-                elif name == 'Metoda Mieszana (Pseudo)':
+                elif name == 'Metoda A (pseudoetykiety)':
                     mock_vals = 0.82 / (1 + np.exp(-0.12 * (epochs_mock - 25))) + np.random.normal(0, 0.02, 100)
                 else:
                     mock_vals = baseline

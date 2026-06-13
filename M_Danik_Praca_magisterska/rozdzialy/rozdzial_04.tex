@@ -9,8 +9,8 @@ Celem przeprowadzonych eksperymentów była ocena wpływu technik uczenia półn
 Proces badawczy został podzielony na dwie główne fazy: ewaluację modeli odniesienia (ang.\ \emph{baseline}) wytrenowanych wyłącznie na małym zbiorze danych oraz uczenie modeli docelowych z~wykorzystaniem danych nieoznakowanych lub syntetycznych. W~badaniach wykorzystano trzy odrębne architektury:
 \begin{itemize}
     \item \textbf{YOLOv8n} -- sprawdzony detektor jednoetapowy w~wariancie \emph{Nano},
-    \item \textbf{YOLOv26n} -- najnowsza iteracja rodziny YOLO, optymalizująca efektywność parametrów w~wariancie \emph{Nano},
-    \item \textbf{RT-DETR-L} -- oparty na transformerach wizyjnych detektor w~dużym wariancie (\emph{Large}). Wybór wariantu Large (około 32 mln parametrów) miał umożliwić ocenę podatności tej architektury na przeuczenie w~warunkach ograniczonej liczby danych oraz weryfikację skuteczności metod SSL.
+    \item \textbf{YOLOv26n} -- nowszy, eksperymentalny wariant rodziny YOLO, optymalizujący efektywność parametrów w~wariancie \emph{Nano},
+    \item \textbf{RT-DETR-L} -- oparty na transformerach wizyjnych detektor w~dużym wariancie (\emph{Large}). Wybór wariantu Large (około 32 mln parametrów) miał umożliwić ocenę podatności tej architektury na przeuczenie w~warunkach ograniczonej liczby danych oraz weryfikację skuteczności metod wzbogacania danych.
 \end{itemize}
 
 Do ilościowej oceny jakości modeli w~zadaniu detekcji wykorzystano precyzję (ang.\ \emph{Precision}), czułość (ang.\ \emph{Recall}) oraz średnią precyzję (ang.\ \emph{mean Average Precision}, Box mAP) wyznaczaną dla progu części wspólnej ramek (ang.\ \emph{Intersection over Union}, IoU) na poziomie $0.5$ (mAP@0.5) oraz uśrednioną w~przedziale od $0.5$ do $0.95$ (mAP@0.5:0.95).
@@ -59,6 +59,8 @@ Konfiguracja hiperparametrów treningu została wyabstrahowana do scentralizowan
 
 Logika uczenia została osadzona w~module \texttt{training\_methods.py}. System automatycznie alokuje odpowiednie wagi pre-trenowane dla badanych modeli (\texttt{yolov8n.pt}, \texttt{yolo26n.pt} oraz \texttt{rtdetr-l.pt}). Moduł ten odpowiada również za dynamiczne dostosowywanie hiperparametrów do specyfiki architektury -- zaimplementowano w~nim m.in.\ mechanizm osłabiający augmentację (wyłączenie \emph{MixUp}, zmniejszenie tolerancji obrotu) dla modelu RT-DETR, co wynika ze specyfiki treningu transformerów wizyjnych. Dzięki takiej architekturze, wynik każdej iteracji w~procesie Nauczyciel-Uczeń staje się automatycznie punktem startowym dla kolejnego etapu, minimalizując ryzyko błędu ludzkiego.
 
+Każde uruchomienie eksperymentu zapisywało komplet artefaktów umożliwiających późniejszą analizę i~odtworzenie przebiegu treningu: plik \texttt{args.yaml} z~parametrami uruchomienia, plik \texttt{results.csv} z~metrykami raportowanymi po kolejnych epokach, wykresy diagnostyczne generowane przez środowisko Ultralytics oraz najlepszy punkt kontrolny modelu. Na tej podstawie przygotowano skrypty agregujące wyniki do tabel zbiorczych i~wykresów porównawczych wykorzystywanych w~rozdziale 5. Takie rozdzielenie konfiguracji, treningu i~raportowania umożliwiało prowadzenie eksperymentów w~trybie iteracyjnym oraz bezpośrednie porównywanie wariantów dla różnych architektur.
+
 \section{Przygotowanie i~generowanie danych treningowych}
 
 Kluczowym aspektem weryfikacji algorytmów było odpowiednie zdefiniowanie i~przygotowanie zbiorów danych. Do badań wykorzystano zdjęcia w~wysokiej rozdzielczości, udostępnione dzięki uprzejmości dr. Krzysztofa Chudy (Wydział Geoinżynierii, Górnictwa i~Geologii PWr). 
@@ -87,7 +89,7 @@ Na potrzeby prowadzonych badań, wygenerowane kafelki obrazu zostały rygorystyc
 
 \subsection{Proces generowania pseudoetykiet (Metoda A)}
 
-Zautomatyzowany proces uczenia oparty na generowaniu pseudoetykiet zrealizowano w~trybie dwuiteracyjnym, zgodnie z~następującą procedurą:
+Zautomatyzowany proces uczenia oparty na generowaniu pseudoetykiet zrealizowano w~trybie iteracyjnym, zgodnie z~następującą procedurą:
 \begin{enumerate}
     \item \textbf{Generowanie etykiet z~filtracją jakościową:} Model odniesienia (Nauczyciel) dokonywał predykcji na zbiorze nieoznakowanym. W~celu ograniczenia zjawiska błędu potwierdzenia (ang.\ \emph{confirmation bias}), akceptowano wyłącznie predykcje, dla których pewność modelu przekraczała empirycznie wyznaczony próg ($Conf \geq 0.45$). Odrzucano również detekcje o~anomalnie dużej powierzchni (powyżej $35\%$ kafelka), co stanowiło filtrację geometryczną eliminującą fałszywe wskazania w~obszarach tła.
     \item \textbf{Generowanie próbek negatywnych (ang.\ Negative Samples):} Obrazy niespełniające powyższych kryteriów oznaczano jako puste tło, co wymuszało na detektorze naukę poprawnego ignorowania obszarów takich jak niebo czy woda.

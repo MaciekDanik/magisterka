@@ -26,7 +26,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Pobieramy plik o największym rozmiarze (najwięcej epok = faktyczny, pełny trening, a nie ucięty testowy!)
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -43,18 +43,18 @@ def main():
     for arch_display_name, arch_prefix in architectures.items():
         # Scenariusze i ścieżki dla konkretnej architektury
         scenarios = {
-            'Baseline': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
-            'Metoda A (SSL / Pseudo-etykiety)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
-            'Metoda B (Syntetyczne tła)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
+            'Model odniesienia': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
+            'Metoda A (pseudoetykiety)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
+            'Metoda B (syntetyczne tła)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
         }
         
         data = []
         
         # Fallback dla testu, gdyby folderów jakiegoś modelu jeszcze nie było
         mock_data = {
-            'Baseline': [0.65, 0.70, 0.60],
-            'Metoda A (SSL / Pseudo-etykiety)': [0.72, 0.68, 0.81],
-            'Metoda B (Syntetyczne tła)': [0.71, 0.85, 0.58]
+            'Model odniesienia': [0.65, 0.70, 0.60],
+            'Metoda A (pseudoetykiety)': [0.72, 0.68, 0.81],
+            'Metoda B (syntetyczne tła)': [0.71, 0.85, 0.58]
         }
         
         for name, path in scenarios.items():
@@ -93,7 +93,7 @@ def main():
         ax.set_ylim(0.0, 1.05) # Poprawka: Oś od 0, by nie obcinać słupków < 0.4
         ax.set_ylabel("Wartość metryki [0 - 1]", fontsize=12)
         ax.set_xlabel("", fontsize=12)
-        ax.set_title(f"Wpływ metod SSL na metryki detekcji - {arch_display_name}", fontsize=14)
+        ax.set_title(f"Wpływ metod wzbogacania danych na metryki detekcji - {arch_display_name}", fontsize=14)
         
         # Konfiguracja legendy - niezasłaniająca danych
         ax.legend(loc='upper right', bbox_to_anchor=(1, 1), ncol=1)

@@ -29,7 +29,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Zabezpieczenie przed pobieraniem mockowych run'ów (np. mających tylko 10 epok) 
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -45,9 +45,9 @@ def main():
 
     for arch_display, arch_prefix in architectures.items():
         runs = {
-            'Baseline': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
-            'SSL Pseudo': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
-            'SSL Generative': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
+            'Model odniesienia': find_latest_run(os.path.join(base_path, f"{arch_prefix}_Baseline")),
+            'Metoda A (pseudoetykiety)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Pseudo")),
+            'Metoda B (syntetyczne tła)': find_latest_run(os.path.join(base_path, f"{arch_prefix}_SSL_Generative")),
         }
         
         angles = [n / float(N) * 2 * pi for n in range(N)]
@@ -63,9 +63,9 @@ def main():
         colors = ['#1f77b4', '#2ca02c', '#ff7f0e']
         
         mock_data = {
-            'Baseline': [0.65, 0.45, 0.70, 0.60, 0.64],
-            'SSL Pseudo': [0.82, 0.62, 0.80, 0.85, 0.82],
-            'SSL Generative': [0.75, 0.55, 0.73, 0.78, 0.75]
+            'Model odniesienia': [0.65, 0.45, 0.70, 0.60, 0.64],
+            'Metoda A (pseudoetykiety)': [0.82, 0.62, 0.80, 0.85, 0.82],
+            'Metoda B (syntetyczne tła)': [0.75, 0.55, 0.73, 0.78, 0.75]
         }
         
         for (name, path), color in zip(runs.items(), colors):

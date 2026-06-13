@@ -10,7 +10,7 @@ def generate_comparison_table(base_dir="models/training_runs"):
         'RT-DETR-L': 'rtdetr'
     }
     categories = {
-        'Baseline': 'Baseline',
+        'Model odniesienia': 'Baseline',
         'Metoda A (SSL / Pseudo)': 'SSL_Pseudo',
         'Metoda B (Syntetyczne tła)': 'SSL_Generative'
     }
@@ -21,7 +21,7 @@ def generate_comparison_table(base_dir="models/training_runs"):
             run_dir = base_path / f"{arch_prefix}_{cat_suffix}"
             csv_files = list(run_dir.glob("*/results.csv"))
             if csv_files:
-                # Wybieramy plik o największym rozmiarze (najwięcej epok) - ten sam mechanizm z plotów
+                # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
                 best_file = max(csv_files, key=lambda p: p.stat().st_size)
                 results_files.append((best_file, arch_display, cat_display))
     

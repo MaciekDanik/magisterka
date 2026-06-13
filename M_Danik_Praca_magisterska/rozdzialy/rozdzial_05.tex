@@ -1,6 +1,6 @@
 \chapter{Eksperymenty i~analiza wyników}
 
-W~niniejszym rozdziale przedstawiono wyniki uzyskane podczas treningu i~ewaluacji modeli detekcji w~przygotowanym środowisku eksperymentalnym. Analizę rozpoczęto od oceny modeli odniesienia, aby następnie zweryfikować i~porównać wpływ zaproponowanych metod badawczych opartych na iteracyjnym uczeniu półnadzorowanym (ang.\ \emph{Semi-Supervised Learning} -- SSL). Skuteczność potoku SSL zbadano w~dwóch wariantach: z~wykorzystaniem standardowego pseudoetykietowania (Metoda A) oraz przy użyciu syntetycznie wygenerowanych danych nieoznakowanych (Metoda B). Wszystkie zaprezentowane poniżej wartości liczbowe metryk (w~tym mAP oraz funkcje straty) wyznaczono na zbiorze walidacyjnym.
+W~niniejszym rozdziale przedstawiono wyniki uzyskane podczas treningu i~ewaluacji modeli detekcji w~przygotowanym środowisku eksperymentalnym. Analizę rozpoczęto od oceny modeli odniesienia, aby następnie zweryfikować i~porównać wpływ dwóch metod wzbogacania danych: iteracyjnego uczenia półnadzorowanego z~pseudoetykietowaniem (Metoda A) oraz syntetycznej augmentacji próbkami tła (Metoda B). Wszystkie zaprezentowane poniżej wartości liczbowe metryk (w~tym mAP oraz funkcje straty) wyznaczono na zbiorze walidacyjnym. Jeżeli dla danej konfiguracji istniało kilka uruchomień, do zestawień wykorzystano najdłuższy kompletny przebieg treningowy, a~krótkie uruchomienia kontrolne pominięto.
 
 \section{Ewaluacja modeli odniesienia}
 
@@ -10,7 +10,6 @@ Jako punkt odniesienia (ang.\ \emph{baseline}) w~badaniach przyjęto modele wytr
 
 Modele odniesienia z~rodziny YOLO zostały poddane procesowi uczenia zgodnie z~przyjętymi hiperparametrami. Jak można zauważyć na profilach wydajności (Rysunek \ref{fig:radar_yolo8} i~\ref{fig:radar_yolo26}) oraz wykresach słupkowych (Rysunek \ref{fig:bars_yolo8} i~\ref{fig:bars_yolo26}), model YOLOv8n poradził sobie z~zadaniem referencyjnym bardzo dobrze, osiągając na zbiorze walidacyjnym wysoką wartość metryki mAP@0.5 na poziomie 0.882. Charakteryzował się przy tym dobrym balansem między precyzją (0.845) a~czułością (0.777). Z~analizy krzywej straty walidacyjnej (Rysunek \ref{fig:loss_yolo8}) wynika, że minimum funkcji straty dla tego modelu wystąpiło w~256. epoce.
 
-% MIEJSCE NA WYKRESY RADAROWE I~SŁUPKOWE DLA YOLO
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_5_radar_YOLOv8.png}
@@ -21,7 +20,7 @@ Modele odniesienia z~rodziny YOLO zostały poddane procesowi uczenia zgodnie z~p
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_YOLOv8.png}
-\caption{Wpływ metod SSL na metryki detekcji modelu YOLOv8n na zbiorze walidacyjnym.}
+\caption{Wpływ metod wzbogacania danych na metryki detekcji modelu YOLOv8n na zbiorze walidacyjnym.}
 \label{fig:bars_yolo8}
 \end{figure}
 
@@ -35,13 +34,12 @@ Modele odniesienia z~rodziny YOLO zostały poddane procesowi uczenia zgodnie z~p
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_YOLO26.png}
-\caption{Wpływ metod SSL na metryki detekcji modelu YOLOv26n na zbiorze walidacyjnym.}
+\caption{Wpływ metod wzbogacania danych na metryki detekcji modelu YOLOv26n na zbiorze walidacyjnym.}
 \label{fig:bars_yolo26}
 \end{figure}
 
 Z~kolei model YOLOv26n osiągnął nieco niższe wyniki referencyjne (mAP@0.5 równe 0.823, precyzja 0.807, czułość 0.737). Niższa czułość sugeruje, że model ten pomijał część obiektów docelowych, natomiast analiza fałszywych detekcji przedstawiona w~dalszej części rozdziału wskazuje, że wariant ten wymagał dodatkowej regularyzacji. Minimum funkcji straty walidacyjnej wystąpiło w~233. epoce (Rysunek \ref{fig:loss_yolo26}).
 
-% MIEJSCE NA NOWE WYKRESY FUNKCJI STRATY (ANALIZA PRZEUCZENIA) DLA YOLO
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{Pics/Charts/wykres_2_loss_YOLOv8.png}
@@ -62,7 +60,6 @@ Analogicznemu procesowi ewaluacji poddano model RT-DETR-L. Jako że jest to arch
 
 Wyniki referencyjne metryk dla RT-DETR-L (Rysunek \ref{fig:radar_rtdetr} i~\ref{fig:bars_rtdetr}) były porównywalne z~wynikami YOLOv8n (mAP@0.5 równe 0.877, precyzja 0.829, czułość 0.817). Model dobrze radził sobie z~lokalizacją obiektów, jednak krzywa straty walidacyjnej (Rysunek \ref{fig:loss_rtdetr}) wskazuje na większą niestabilność procesu uczenia niż w~przypadku detektorów splotowych. Minimum straty walidacyjnej przypadło na 230. epokę.
 
-% MIEJSCE NA WYKRESY DLA RT-DETR
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_5_radar_RT-DETR-L.png}
@@ -73,7 +70,7 @@ Wyniki referencyjne metryk dla RT-DETR-L (Rysunek \ref{fig:radar_rtdetr} i~\ref{
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\linewidth]{Pics/Charts/wykres_1_metryki_RT-DETR-L.png}
-\caption{Wpływ metod SSL na metryki detekcji modelu RT-DETR-L na zbiorze walidacyjnym.}
+\caption{Wpływ metod wzbogacania danych na metryki detekcji modelu RT-DETR-L na zbiorze walidacyjnym.}
 \label{fig:bars_rtdetr}
 \end{figure}
 
@@ -94,7 +91,6 @@ Proces iteracyjnego uczenia z~pseudoetykietami przyniósł odmienne rezultaty dl
 
 Inaczej zareagował model YOLOv26n. Zastosowanie metody SSL Pseudo pozwoliło mu poprawić mAP@0.5 o~3.4 p.p. (wzrost do 0.857). Zarówno precyzja, jak i~czułość uległy poprawie. Przetworzenie dodatkowych, nieoznakowanych danych w~pętli Nauczyciel--Uczeń zadziałało w~tym przypadku jak mechanizm regularyzacji. Dodanie tych danych przesunęło minimum funkcji straty z~233. na 283. epokę (Rysunek \ref{fig:loss_yolo26}).
 
-% MIEJSCE NA KRZYWE UCZENIA mAP (YOLO)
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{Pics/Charts/wykres_4_konwergencja_YOLOv8.png}
@@ -115,7 +111,6 @@ Dla detektora RT-DETR-L wdrożenie Metody A~przyniosło niewielki wzrost globaln
 
 Z~analizy krzywej uczenia (mAP na przestrzeni epok, Rysunek \ref{fig:map_rtdetr}) dla RT-DETR-L wynika, że zastosowanie SSL Pseudo pozwoliło utrzymać wysoką jakość detekcji przy niewielkiej poprawie metryk końcowych. Jednocześnie minimum straty walidacyjnej wystąpiło wcześniej niż dla modelu odniesienia (126. epoka wobec 230. epoki), co wskazuje, że dodatkowe dane nie przełożyły się w~tym przypadku na późniejsze minimum funkcji straty, mimo poprawy F1-score.
 
-% MIEJSCE NA KRZYWĄ UCZENIA mAP (RT-DETR)
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{Pics/Charts/wykres_4_konwergencja_RT-DETR-L.png}
@@ -123,13 +118,13 @@ Z~analizy krzywej uczenia (mAP na przestrzeni epok, Rysunek \ref{fig:map_rtdetr}
 \label{fig:map_rtdetr}
 \end{figure}
 
-\section{Eksperyment B: Uczenie półnadzorowane z~syntetycznym tłem (SSL Generative)}
+\section{Eksperyment B: Syntetyczna augmentacja próbkami tła (SSL Generative)}
 
-W~drugim eksperymencie proces SSL rozszerzono o~syntetycznie wygenerowane próbki negatywne (Metoda B). Do zbioru dodano obrazy przedstawiające różne typy tła bez obiektów docelowych. Rozwiązanie to miało zwiększyć różnorodność danych treningowych i~ograniczyć liczbę fałszywych detekcji związanych z~przeuczeniem modelu na konkretnych fragmentach tła.
+W~drugim eksperymencie zbiór treningowy rozszerzono o~syntetycznie wygenerowane próbki negatywne (Metoda B). Do zbioru dodano obrazy przedstawiające różne typy tła bez obiektów docelowych. Rozwiązanie to miało zwiększyć różnorodność danych treningowych i~ograniczyć liczbę fałszywych detekcji związanych z~przeuczeniem modelu na konkretnych fragmentach tła.
 
 \subsection{Analiza wyników dla modeli YOLO}
 
-Dodanie syntetycznie wygenerowanych próbek negatywnych do procesu SSL nie poprawiło skuteczności modelu YOLOv8n względem modelu odniesienia (spadek mAP@0.5 o~1.4 p.p.). Precyzja wzrosła do 0.867, ale czułość obniżyła się do 0.724. Wyniki sugerują, że model stał się bardziej konserwatywny w~generowaniu detekcji, co ograniczyło część fałszywych wskazań, ale jednocześnie zwiększyło liczbę pominiętych obiektów.
+Dodanie syntetycznie wygenerowanych próbek negatywnych do zbioru treningowego nie poprawiło skuteczności modelu YOLOv8n względem modelu odniesienia (spadek mAP@0.5 o~1.4 p.p.). Precyzja wzrosła do 0.867, ale czułość obniżyła się do 0.724. Wyniki sugerują, że model stał się bardziej konserwatywny w~generowaniu detekcji, co ograniczyło część fałszywych wskazań, ale jednocześnie zwiększyło liczbę pominiętych obiektów.
 
 Odmiennie zachował się model YOLOv26n, który w~tym eksperymencie osiągnął najlepsze wyniki spośród wszystkich wariantów tej architektury. Zastosowanie metody SSL Generative zwiększyło wartość mAP@0.5 o~5.1 p.p., osiągając wynik 0.874. Poprawie uległy również precyzja i~F1-score. Dodatkowe próbki negatywne mogły przyczynić się do lepszego rozróżniania obiektów docelowych od tła. Na ograniczenie przeuczenia może wskazywać przesunięcie minimum straty walidacyjnej z~233. na 445. epokę treningu (Rysunek \ref{fig:loss_yolo26}).
 
@@ -141,7 +136,7 @@ Dodatkowo analiza krzywej uczenia modelu RT-DETR-L (Rysunek \ref{fig:map_rtdetr}
 
 \section{Wybrane przykłady predykcji}
 
-Poniżej przedstawiono przykładowe predykcje modeli dla obrazów z~wyizolowanego zbioru \emph{Test-Sacred}, które nie były wykorzystywane na żadnym etapie treningu ani walidacji. Przykłady te służą wizualnej weryfikacji zdolności modeli do generalizacji poza zbiorem walidacyjnym. Dodatkowe przykłady zamieszczono w~Dodatku A. W~tabelach przedstawiono liczbę wszystkich detekcji, detekcji poprawnych (TP), fałszywie pozytywnych (FP) oraz fałszywie negatywnych (FN) dla pokazanego kafelka, przy progu IoU równym $0.5$.
+Poniżej przedstawiono przykładowe predykcje modeli dla obrazów z~wyizolowanego zbioru \emph{Test-Sacred}, które nie były wykorzystywane na żadnym etapie treningu ani walidacji. Przykłady te służą wizualnej weryfikacji zdolności modeli do generalizacji poza zbiorem walidacyjnym. Dodatkowe przykłady zamieszczono w~Dodatku A. W~tabelach przedstawiono liczbę wszystkich detekcji, detekcji poprawnych (TP), fałszywie pozytywnych (FP) oraz fałszywie negatywnych (FN) dla pokazanego kafelka, przy progu IoU równym $0.5$. Ponieważ adnotacje referencyjne w~zbiorze \emph{Test-Sacred} zapisano jako maski segmentacyjne, na potrzeby tego porównania przekształcono je do prostokątnych ramek obwiedni.
 
 \subsection{Predykcje modeli odniesienia}
 \begin{figure}[htbp]
@@ -169,15 +164,15 @@ Poniżej przedstawiono przykładowe predykcje modeli dla obrazów z~wyizolowaneg
 \hline
 \textbf{Metryka} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
 Liczba detekcji   & 14               & 6                 & 13                 \\ \hline
-TP                & 0                & 0                 & 0                  \\ \hline
-FP                & 14               & 6                 & 13                 \\ \hline
-FN                & 4                & 4                 & 4                  \\ \hline
-Precyzja          & 0.00             & 0.00              & 0.00               \\ \hline
-Czułość           & 0.00             & 0.00              & 0.00               \\ \hline
+TP                & 4                & 4                 & 4                  \\ \hline
+FP                & 10               & 2                 & 9                  \\ \hline
+FN                & 0                & 0                 & 0                  \\ \hline
+Precyzja          & 0.29             & 0.67              & 0.31               \\ \hline
+Czułość           & 1.00             & 1.00              & 1.00               \\ \hline
 \end{tabular}
 \end{table}
 
-Analiza rysunku \ref{fig:baseline_comparison} oraz danych ilościowych z~tabeli \ref{tab:baseline_stats} pokazuje, że wybrany kafelek jest trudnym przypadkiem dla modeli odniesienia. Modele generują wiele wskazań, ale nie pokrywają one poprawnie czterech obiektów referencyjnych przy progu IoU równym $0.5$. Szczególnie widoczne jest to dla YOLOv8n oraz RT-DETR-L, które wskazały odpowiednio 14 i~13 fałszywie pozytywnych detekcji.
+Analiza rysunku \ref{fig:baseline_comparison} oraz danych ilościowych z~tabeli \ref{tab:baseline_stats} pokazuje, że wybrany kafelek jest trudnym przypadkiem dla modeli odniesienia głównie ze względu na nadmiarowe wskazania. Wszystkie trzy modele poprawnie pokryły cztery obiekty referencyjne przy progu IoU równym $0.5$, jednak YOLOv8n oraz RT-DETR-L wygenerowały odpowiednio 10 i~9 fałszywie pozytywnych detekcji. Najbardziej precyzyjny w~tym przykładzie był model YOLOv26n.
 
 \subsection{Predykcje modeli z~Metody A~(SSL Pseudo)}
 \begin{figure}[htbp]
@@ -205,16 +200,16 @@ Analiza rysunku \ref{fig:baseline_comparison} oraz danych ilościowych z~tabeli 
 \hline
 \textbf{Metryka} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
 Liczba detekcji     & 7                & 6                 & 7                  \\ \hline
-TP                  & 0                & 0                 & 0                  \\ \hline
-FP                  & 7                & 6                 & 7                  \\ \hline
-FN                  & 4                & 4                 & 4                  \\ \hline
-Precyzja            & 0.00             & 0.00              & 0.00               \\ \hline
-Czułość             & 0.00             & 0.00              & 0.00               \\ \hline
+TP                  & 4                & 4                 & 4                  \\ \hline
+FP                  & 3                & 2                 & 3                  \\ \hline
+FN                  & 0                & 0                 & 0                  \\ \hline
+Precyzja            & 0.57             & 0.67              & 0.57               \\ \hline
+Czułość             & 1.00             & 1.00              & 1.00               \\ \hline
 \end{tabular}
 \end{table}
 
 
-Zastosowanie iteracyjnego pseudoetykietowania zmniejszyło liczbę wskazań dla modeli YOLOv8n i~RT-DETR-L, co ograniczyło liczbę fałszywie pozytywnych detekcji na analizowanym kafelku. Jednocześnie żaden z~modeli nie uzyskał poprawnego dopasowania do ramek referencyjnych przy progu IoU $0.5$, dlatego przykład ten należy interpretować jako ilustrację redukcji nadmiarowych wskazań, a~nie pełnej poprawy lokalizacji obiektów.
+Zastosowanie iteracyjnego pseudoetykietowania zmniejszyło liczbę wskazań dla modeli YOLOv8n i~RT-DETR-L, co ograniczyło liczbę fałszywie pozytywnych detekcji na analizowanym kafelku. Wszystkie modele zachowały pełną czułość względem czterech obiektów referencyjnych, ale różniły się precyzją wynikającą z~liczby nadmiarowych ramek.
 
 \subsection{Predykcje modeli z~Metody B (SSL Generative)}
 \begin{figure}[htbp]
@@ -242,17 +237,17 @@ Zastosowanie iteracyjnego pseudoetykietowania zmniejszyło liczbę wskazań dla 
 \hline
 \textbf{Metryka} & \textbf{YOLOv8n} & \textbf{YOLOv26n} & \textbf{RT-DETR-L} \\ \hline
 Liczba detekcji         & 7                & 5                 & 17                 \\ \hline
-TP                      & 0                & 0                 & 0                  \\ \hline
-FP                      & 7                & 5                 & 17                 \\ \hline
-FN                      & 4                & 4                 & 4                  \\ \hline
-Precyzja                & 0.00             & 0.00              & 0.00               \\ \hline
-Czułość                 & 0.00             & 0.00              & 0.00               \\ \hline
+TP                      & 4                & 4                 & 4                  \\ \hline
+FP                      & 3                & 1                 & 13                 \\ \hline
+FN                      & 0                & 0                 & 0                  \\ \hline
+Precyzja                & 0.57             & 0.80              & 0.24               \\ \hline
+Czułość                 & 1.00             & 1.00              & 1.00               \\ \hline
 \end{tabular}
 \end{table}
 
-Dodanie syntetycznych obrazów tła (Metoda B) uwidoczniło różnice w~zachowaniu poszczególnych architektur. Dla modeli YOLO liczba wskazań pozostała niższa niż w~modelach odniesienia, co sugeruje działanie próbek negatywnych jako dodatkowego mechanizmu ograniczającego nadmiarowe detekcje.
+Dodanie syntetycznych obrazów tła (Metoda B) uwidoczniło różnice w~zachowaniu poszczególnych architektur. Dla modeli YOLO liczba wskazań pozostała niższa niż w~modelach odniesienia, co sugeruje działanie próbek negatywnych jako dodatkowego mechanizmu ograniczającego nadmiarowe detekcje. Największą precyzję w~tym przykładzie uzyskał YOLOv26n, który przy pełnej czułości wygenerował tylko jedną fałszywie pozytywną detekcję.
 
-Odmienne zachowanie zaobserwowano dla modelu RT-DETR-L. Wprowadzenie syntetycznych danych zwiększyło liczbę fałszywie pozytywnych wskazań do 17, co jest spójne z~wynikami ilościowymi pokazującymi pogorszenie metryk tej architektury po zastosowaniu Metody B. Jedną z~możliwych przyczyn jest uczenie się zależności obecnych w~danych syntetycznych, które nie występowały w~danych rzeczywistych.
+Odmienne zachowanie zaobserwowano dla modelu RT-DETR-L. Wprowadzenie syntetycznych danych zwiększyło liczbę fałszywie pozytywnych wskazań do 13, co jest spójne z~wynikami ilościowymi pokazującymi pogorszenie metryk tej architektury po zastosowaniu Metody B. Jedną z~możliwych przyczyn jest uczenie się zależności obecnych w~danych syntetycznych, które nie występowały w~danych rzeczywistych.
 
 \section{Analiza statystyczna fałszywych detekcji}
 
@@ -294,7 +289,6 @@ Szczegółowe zestawienie wszystkich monitorowanych metryk ewaluacyjnych (w~tym 
 
 Zestawienie wyników ilościowych z~przykładami predykcji ze zbioru \emph{Test-Sacred} pozwala na sformułowanie wniosków dotyczących podatności badanych architektur na analizowane techniki. Na wykresie podatności można wyróżnić trzy różne profile zachowań sieci:
 
-% MIEJSCE NA WYKRES PODATNOŚCI
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\linewidth]{Pics/Charts/wykres_3_architektury.png}
@@ -303,11 +297,11 @@ Zestawienie wyników ilościowych z~przykładami predykcji ze zbioru \emph{Test-
 \end{figure}
 
 \begin{enumerate}
-\item \textbf{YOLOv8n (model o~wysokim wyniku referencyjnym):} Architektura ta już w~modelu odniesienia osiągnęła wysoką wartość mAP@0.5. Obie formy iteracyjnego SSL obniżyły globalne metryki, choć w~analizie fałszywych detekcji widoczna była częściowa redukcja nadmiarowych wskazań. Wyniki sugerują, że dodatkowe dane nie poprawiły ogólnej jakości lokalizacji, ale mogły ograniczyć skłonność modelu do detekcji w~obszarach tła.
+\item \textbf{YOLOv8n (model o~wysokim wyniku referencyjnym):} Architektura ta już w~modelu odniesienia osiągnęła wysoką wartość mAP@0.5. Obie metody wzbogacania danych obniżyły globalne metryki, choć w~analizie fałszywych detekcji widoczna była częściowa redukcja nadmiarowych wskazań. Wyniki sugerują, że dodatkowe dane nie poprawiły ogólnej jakości lokalizacji, ale mogły ograniczyć skłonność modelu do detekcji w~obszarach tła.
 
 \item \textbf{YOLOv26n (największa poprawa po SSL):} Model ten zanotował wzrosty metryk po zastosowaniu obu wariantów potoku SSL. Wariant z~syntetycznym tłem (+5.1 p.p. mAP@0.5) sprawdził się lepiej niż klasyczne pseudoetykiety (+3.4 p.p. mAP@0.5), co wskazuje, że w~tej architekturze dodatkowe próbki negatywne mogły wspierać rozróżnianie obiektów docelowych od tła.
 
 \item \textbf{RT-DETR-L (wrażliwość na przesunięcie domenowe):} Model ten zachowywał się inaczej niż detektory YOLO. Standardowy proces SSL (Metoda A) nieznacznie poprawił mAP@0.5 oraz F1-score, natomiast dodanie syntetycznych próbek negatywnych (Metoda B) pogorszyło wyniki. Wskazuje to, że architektura oparta na transformerach może być bardziej wrażliwa na artefakty lub przesunięcie domenowe obecne w~danych generowanych syntetycznie.
 \end{enumerate}
 
-Osiągnięte rezultaty wskazują, że nie istnieje jedna metoda wzbogacania danych, która w~analizowanym scenariuszu poprawiałaby wyniki wszystkich detektorów. Skuteczność danych nieoznakowanych oraz generowanych syntetycznie zależała od architektury modelu, jakości pseudoetykiet oraz stopnia zgodności danych dodatkowych z~domeną obrazów rzeczywistych. Metody A~i~B analizowano osobno, ponieważ celem pracy było rozdzielenie wpływu pseudoetykietowania od wpływu syntetycznych próbek negatywnych. Połączenie obu metod stanowi naturalny kierunek dalszych eksperymentów, ale jego interpretacja wymagałaby dodatkowej kontroli udziału danych rzeczywistych i~syntetycznych w~zbiorze treningowym.
+Osiągnięte rezultaty wskazują, że nie istnieje jedna metoda wzbogacania danych, która w~analizowanym scenariuszu poprawiałaby wyniki wszystkich detektorów. Skuteczność danych nieoznakowanych oraz syntetycznych próbek tła zależała od architektury modelu, jakości pseudoetykiet oraz stopnia zgodności danych dodatkowych z~domeną obrazów rzeczywistych. Metody A~i~B analizowano osobno, ponieważ celem pracy było rozdzielenie wpływu pseudoetykietowania od wpływu syntetycznych próbek negatywnych. Połączenie obu metod stanowi naturalny kierunek dalszych eksperymentów, ale jego interpretacja wymagałaby dodatkowej kontroli udziału danych rzeczywistych i~syntetycznych w~zbiorze treningowym.

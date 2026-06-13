@@ -21,7 +21,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Zabezpieczenie przed przerwamnymi przebiegami - wybieramy ten co ma najwięcej danych
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -46,15 +46,15 @@ def main():
         
         # Generative Delta
         if map_base is not None and map_gen is not None:
-            deltas.append({'Architektura': arch_display, 'Metoda': 'Syntetyczne tła (Generative)', 'Delta': map_gen - map_base})
+            deltas.append({'Architektura': arch_display, 'Metoda': 'Metoda B (syntetyczne tła)', 'Delta': map_gen - map_base})
         else:
-            deltas.append({'Architektura': arch_display, 'Metoda': 'Syntetyczne tła (Generative)', 'Delta': 0})
+            deltas.append({'Architektura': arch_display, 'Metoda': 'Metoda B (syntetyczne tła)', 'Delta': 0})
             
         # Pseudo Delta
         if map_base is not None and map_pse is not None:
-            deltas.append({'Architektura': arch_display, 'Metoda': 'Pseudo-etykiety', 'Delta': map_pse - map_base})
+            deltas.append({'Architektura': arch_display, 'Metoda': 'Metoda A (pseudoetykiety)', 'Delta': map_pse - map_base})
         else:
-            deltas.append({'Architektura': arch_display, 'Metoda': 'Pseudo-etykiety', 'Delta': 0})
+            deltas.append({'Architektura': arch_display, 'Metoda': 'Metoda A (pseudoetykiety)', 'Delta': 0})
         
     df = pd.DataFrame(deltas)
     

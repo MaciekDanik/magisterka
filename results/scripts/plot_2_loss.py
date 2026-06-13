@@ -29,7 +29,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Skupiamy się na pliku z największą ilością logów, by nie paść ofiarą krótkich testowych runów!
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -58,11 +58,11 @@ def main():
             min_epoch_p = epochs_p[np.nanargmin(loss_p)]
             min_epoch_g = epochs_g[np.nanargmin(loss_g)]
             
-            sns.lineplot(x=epochs_b, y=loss_b, label="Baseline", linewidth=2.5, color='darkblue', ax=ax)
-            sns.lineplot(x=epochs_p, y=loss_p, label="Metoda A (Pseudo-etykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
-            sns.lineplot(x=epochs_g, y=loss_g, label="Metoda B (Syntetyczne Tło)", linewidth=2.5, color='darkorange', ax=ax)
+            sns.lineplot(x=epochs_b, y=loss_b, label="Model odniesienia", linewidth=2.5, color='darkblue', ax=ax)
+            sns.lineplot(x=epochs_p, y=loss_p, label="Metoda A (pseudoetykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
+            sns.lineplot(x=epochs_g, y=loss_g, label="Metoda B (syntetyczne tła)", linewidth=2.5, color='darkorange', ax=ax)
             
-            ax.axvline(x=min_epoch_b, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. Baseline (Epoka {int(min_epoch_b)})")
+            ax.axvline(x=min_epoch_b, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. model odniesienia (epoka {int(min_epoch_b)})")
             ax.axvline(x=min_epoch_p, color='#2ca02c', linestyle='--', alpha=0.7, label=f"Min. Metoda A (Epoka {int(min_epoch_p)})")
             ax.axvline(x=min_epoch_g, color='darkorange', linestyle='--', alpha=0.7, label=f"Min. Metoda B (Epoka {int(min_epoch_g)})")
         else:
@@ -77,11 +77,11 @@ def main():
             min_epoch_p_mock = epochs_mock[loss_p.argmin()]
             min_epoch_g_mock = epochs_mock[loss_g.argmin()]
             
-            sns.lineplot(x=epochs_mock, y=loss_b, label="Baseline", linewidth=2.5, color='darkblue', ax=ax)
-            sns.lineplot(x=epochs_mock, y=loss_p, label="Metoda A (Pseudo-etykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
-            sns.lineplot(x=epochs_mock, y=loss_g, label="Metoda B (Syntetyczne Tło)", linewidth=2.5, color='darkorange', ax=ax)
+            sns.lineplot(x=epochs_mock, y=loss_b, label="Model odniesienia", linewidth=2.5, color='darkblue', ax=ax)
+            sns.lineplot(x=epochs_mock, y=loss_p, label="Metoda A (pseudoetykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
+            sns.lineplot(x=epochs_mock, y=loss_g, label="Metoda B (syntetyczne tła)", linewidth=2.5, color='darkorange', ax=ax)
             
-            ax.axvline(x=min_epoch_b_mock, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. Baseline (Epoka {int(min_epoch_b_mock)})")
+            ax.axvline(x=min_epoch_b_mock, color='darkblue', linestyle='--', alpha=0.7, label=f"Min. model odniesienia (epoka {int(min_epoch_b_mock)})")
             ax.axvline(x=min_epoch_p_mock, color='#2ca02c', linestyle='--', alpha=0.7, label=f"Min. Metoda A (Epoka {int(min_epoch_p_mock)})")
             ax.axvline(x=min_epoch_g_mock, color='darkorange', linestyle='--', alpha=0.7, label=f"Min. Metoda B (Epoka {int(min_epoch_g_mock)})")
 

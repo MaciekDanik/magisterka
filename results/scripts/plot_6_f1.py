@@ -30,7 +30,7 @@ def find_latest_run(base_dir):
     csv_files = glob.glob(search_path)
     if not csv_files:
         return None
-    # Pobranie pliku z największą historią logów (żeby pominąć krótkie, testowe iteracje)
+    # Celowo wybieramy najdłuższy pełny przebieg, pomijając krótkie uruchomienia kontrolne.
     return max(csv_files, key=os.path.getsize)
 
 def main():
@@ -58,11 +58,11 @@ def main():
             max_epoch_p = epochs_p[np.argmax(f1_p)]
             max_epoch_g = epochs_g[np.argmax(f1_g)]
             
-            sns.lineplot(x=epochs_b, y=f1_b, label="Baseline", linewidth=2.5, color='darkblue', ax=ax)
-            sns.lineplot(x=epochs_p, y=f1_p, label="Metoda A (Pseudo-etykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
-            sns.lineplot(x=epochs_g, y=f1_g, label="Metoda B (Syntetyczne Tło)", linewidth=2.5, color='darkorange', ax=ax)
+            sns.lineplot(x=epochs_b, y=f1_b, label="Model odniesienia", linewidth=2.5, color='darkblue', ax=ax)
+            sns.lineplot(x=epochs_p, y=f1_p, label="Metoda A (pseudoetykiety)", linewidth=2.5, color='#2ca02c', ax=ax)
+            sns.lineplot(x=epochs_g, y=f1_g, label="Metoda B (syntetyczne tła)", linewidth=2.5, color='darkorange', ax=ax)
             
-            ax.axvline(x=max_epoch_b, color='darkblue', linestyle='--', alpha=0.7, label=f"Max. Baseline (Epoka {int(max_epoch_b)})")
+            ax.axvline(x=max_epoch_b, color='darkblue', linestyle='--', alpha=0.7, label=f"Max. model odniesienia (epoka {int(max_epoch_b)})")
             ax.axvline(x=max_epoch_p, color='#2ca02c', linestyle='--', alpha=0.7, label=f"Max. Metoda A (Epoka {int(max_epoch_p)})")
             ax.axvline(x=max_epoch_g, color='darkorange', linestyle='--', alpha=0.7, label=f"Max. Metoda B (Epoka {int(max_epoch_g)})")
         else:
